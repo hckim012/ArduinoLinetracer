@@ -7,11 +7,12 @@ int strategy;
 
 void car_update(int direction, int num_ticks){
     if(digitalRead(SW)==LOW){
-      direction = STOP;
+      prev_direction = STOP;
       roll(STOP);
       return;
     }
     if(num_ticks>0){
+        // roll num_ticks times and stop
         for(int i=0;i<num_ticks;i++){
             roll(direction);
             delay(TICK);
@@ -20,16 +21,18 @@ void car_update(int direction, int num_ticks){
         }
     }
     else{
-        if(direction!=prev_direction){
-            roll(direction);
-        }
+        // roll but not stop
+        roll(direction);
     }
     prev_direction = direction;
 
 }
 
+unsigned long last_check_time = 0;
 int check_mission(){
     //TODO
+    last_check_time = millis();
+//    Serial.println(last_check_time);
     return NOTHING;
 }
 int do_mission(int mission){
@@ -59,7 +62,7 @@ void travel(){
 
     car_update(FORWARD, 6);
     car_update(STOP, 10);
-    // delay(TICK);
+    
     bool is_line_ahead = find_line();
     if(is_line_ahead){
         junction_type |= SENSOR_F;
@@ -90,21 +93,18 @@ bool find_line(){
         lt_state = lt_sense();
         if(lt_state & SENSOR_F) found_line=true;
         car_update(TURN_RIGHT, 1);
-        // delay(TICK);
         rot_steps+= 1;
     }
     for(int i=0;i<10;i++){
         lt_state = lt_sense();
         if(lt_state & SENSOR_F) found_line=true;
         car_update(TURN_LEFT, 1);
-        // delay(TICK);
         rot_steps-= 1;
     }
     for(int i=0;i<5;i++){
         lt_state = lt_sense();
         if(lt_state & SENSOR_F) found_line=true;
         car_update(TURN_RIGHT, 1);
-        // delay(TICK);
         rot_steps+= 1;
     }
     car_update(STOP, 1);
@@ -112,11 +112,13 @@ bool find_line(){
 }
 void turn_left(){
     car_update(TURN_LEFT, 10); // Force turn
+    car_update(TURN_LEFT, 0);
     while(1){
       lt_state = lt_sense();
       if(lt_state & SENSOR_F) break;
-      car_update(TURN_LEFT, 1);  
+      delay(10);
     }
+    car_update(STOP,1);
     linetrace_step();
 }
 void turn_forward(){
@@ -124,13 +126,14 @@ void turn_forward(){
     linetrace_step();
 }
 void turn_right(){
-//    car_update(TURN_RIGHT, 30);
     car_update(TURN_RIGHT, 10); // Force turn
+    car_update(TURN_RIGHT, 0);
     while(1){
       lt_state = lt_sense();
       if(lt_state & SENSOR_F) break;
-      car_update(TURN_RIGHT, 1);  
+      delay(10);
     }
+    car_update(STOP,1);
     linetrace_step();
 }
 void linetrace_step(){
@@ -138,12 +141,12 @@ void linetrace_step(){
     lt_state = lt_sense();
 
     if(lt_state & SENSOR_L){
-      car_update(FORWARD, 10);
-      car_update(TURN_LEFT, 5);
+      car_update(FORWARD, 2);
+      car_update(TURN_LEFT, 1);
     }
     else if(lt_state & SENSOR_R){
-      car_update(FORWARD, 10);
-      car_update(TURN_RIGHT, 5);
+      car_update(FORWARD, 2);
+      car_update(TURN_RIGHT, 1);
     }
     else if(lt_state & SENSOR_F){
       car_update(FORWARD, 1);
