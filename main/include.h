@@ -18,9 +18,12 @@
 
 #endif
 
+#define MIN_VOLTAGE (9.7)
+#define INF 1000
+
 // time delay const
 // forward 1cm in 1 tick(depends on car speed)
-#define TICK 33
+#define TICK 44
 #define TOCK 10
 #define FOREVER 10000
 
@@ -61,3 +64,5 @@ const int curve_speed = 200;
 #define LT_THRESHOLD_R (54+100)
 
 volatile int l_cnt, f_cnt, r_cnt; // ms passed from last detection
+
+#define USE_CONTROL true

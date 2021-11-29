@@ -21,7 +21,7 @@
 #define ENB 5
 
 // time delay const
-#define TICK 30
+#define TICK 44
 #define TOCK 10
 
 // power of motor
@@ -137,15 +137,25 @@ void setup(){
     init_motor();
     init_line_tracer_modules();
     pinMode(8, INPUT);
-    Serial.println(" ");
-    Serial.println("Motor speed test start!");
+//    Serial.println(" ");
+//    Serial.println("Motor speed test start!");
+//    
+//    car_update(FORWARD, 30);
+//    // delay(1000);
+//    
+//    car_update(BACKWARD, 30);
+//    // delay(1000);
+//    car_update(STOP, 100);
+//    Serial.println("Test end");
     
-    car_update(FORWARD, 30);
-    // delay(1000);
-    
-    car_update(BACKWARD, 30);
-    // delay(1000);
-    car_update(STOP, 1);
+    Serial.println("Motor turn test start!");
+    for(int i=0;i<1;i++){
+        car_update(TURN_LEFT, 1);
+        car_update(TURN_RIGHT, 2);
+        car_update(TURN_LEFT, 1);
+        car_update(STOP, 1);
+      
+    }
     Serial.println("Test end");
 
 }
