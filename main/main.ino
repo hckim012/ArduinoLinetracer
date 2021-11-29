@@ -151,7 +151,7 @@ void turn_left(){
     start_new_linetrace();
 }
 void turn_forward(){
-    car_update(FORWARD, 10);
+    car_update(FORWARD, 3);
     start_new_linetrace();
 }
 void turn_right(){

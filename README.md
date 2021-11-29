@@ -1,4 +1,8 @@
 # Arduino Line tracer project
-## Line tracing
+## Features
 * Turn
 * Junction turn
+
+## Algorithm
+[see here](Algorithm.md)
+
