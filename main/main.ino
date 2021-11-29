@@ -47,12 +47,12 @@ int determine_junction_type(){
     if(lt_state&SENSOR_L) junction_type|= SENSOR_L;
     if(lt_state&SENSOR_R) junction_type|= SENSOR_R;
 
-    car_update(FORWARD, 4);
+    car_update(FORWARD, 4);// 4cm
     
     if(l_cnt<4*TICK)  junction_type|= SENSOR_L;
     if(r_cnt<4*TICK)  junction_type|= SENSOR_R;
 
-    car_update(FORWARD, 6);
+    car_update(FORWARD, 6);// 6cm
     car_update(STOP, 10);
     
     int line_pos = find_line(5, SENSOR_F, false);
@@ -60,7 +60,7 @@ int determine_junction_type(){
         junction_type |= SENSOR_F;
     }
 //    car_update(BACKWARD, 20);
-    car_update(FORWARD, 10);
+    car_update(FORWARD, 10);//??
     return junction_type;
 }
 
@@ -112,7 +112,7 @@ int find_line(int max_turn_steps, int target_sensor, bool net_turn){
         delay(10);
         rot_steps+= 1;
     }
-    if(max_turn_steps > 5)    car_update(STOP, 10);
+    if(max_turn_steps >= 5)    car_update(STOP, 10);
     for(int i=0;i<2*max_turn_steps*TICK;i+=10){
         lt_state = lt_sense();
         if(lt_state & target_sensor){
@@ -124,7 +124,7 @@ int find_line(int max_turn_steps, int target_sensor, bool net_turn){
         delay(10);
         rot_steps-= 1;
     }
-    if(max_turn_steps > 5)    car_update(STOP, 10);
+    if(max_turn_steps >= 5)    car_update(STOP, 10);
     for(int i=0;i<max_turn_steps*TICK;i+=10){
         lt_state = lt_sense();
         if(lt_state & target_sensor){
@@ -142,7 +142,7 @@ int find_line(int max_turn_steps, int target_sensor, bool net_turn){
 void turn_left(){
     car_update(TURN_LEFT, 3); // Force turn
     car_update(TURN_LEFT, 0);
-    while(1){
+    for(int i=0;i<1000;i++){
       lt_state = lt_sense();
       if(lt_state & SENSOR_L) break;
       delay(10);
@@ -157,7 +157,7 @@ void turn_forward(){
 void turn_right(){
     car_update(TURN_RIGHT, 3); // Force turn
     car_update(TURN_RIGHT, 0);
-    while(1){
+    for(int i=0;i<1000;i++){
       lt_state = lt_sense();
       if(lt_state & SENSOR_R) break;
       delay(10);
@@ -193,7 +193,7 @@ void linetrace_step(){
     else if(lt_state & SENSOR_L){
       if(on_line==0)
         car_update(FORWARD, 2);
-      while(true){
+      for(int i=0;i<1000;i++){
           car_update(TURN_LEFT, 0);
           delay(10);
           lt_state = lt_sense();
@@ -204,7 +204,7 @@ void linetrace_step(){
     else if(lt_state & SENSOR_R){
       if(on_line==0)
         car_update(FORWARD, 2);
-      while(true){
+      for(int i=0;i<1000;i++){
           car_update(TURN_RIGHT, 0);
           delay(10);
           lt_state = lt_sense();
@@ -216,7 +216,7 @@ void linetrace_step(){
         int search_step;
         int line_pos;
         car_update(STOP, 10); //Make sure car & motor stop for accurate rotation
-        for(search_step = 1;search_step<=5;search_step+=1){
+        for(search_step = 1;search_step<=3;search_step+=1){
             line_pos = find_line(search_step, 0b010, true);  
             if(line_pos != INF) break;  
         }
@@ -232,6 +232,7 @@ void linetrace_step(){
             for(search_step = 4; search_step <= 100; search_step *= 2){
                 line_pos = find_line(search_step, 0b111, true);
                 if(line_pos != INF) break;
+                car_update(STOP, 10);
             }
         }
         if(search_step>100){

@@ -27,11 +27,13 @@ int lt_sense(){
     ltValue = (l_cnt<10)*SENSOR_L+(f_cnt<10)*SENSOR_F+(r_cnt<10)*SENSOR_R;
     return ltValue;
 }
-
-void set_lt_interrupt(){
+void reset_lt(){
     l_cnt = 1000;
     f_cnt = 1000;
     r_cnt = 1000;
+}
+void set_lt_interrupt(){
+    reset_lt();
     Timer1.initialize(1000); // every 1ms
     Timer1.attachInterrupt(lt_interrupt);
 }

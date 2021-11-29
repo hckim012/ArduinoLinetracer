@@ -25,8 +25,8 @@
 #define TOCK 10
 
 // power of motor
-int speed = 100;
-int backward_speed = 100;
+int speed = 110;
+int backward_speed = 110;
 int curve_speed = 200;
 
 int black_threshold, white_threshold;
@@ -137,26 +137,26 @@ void setup(){
     init_motor();
     init_line_tracer_modules();
     pinMode(8, INPUT);
-//    Serial.println(" ");
-//    Serial.println("Motor speed test start!");
-//    
-//    car_update(FORWARD, 30);
-//    // delay(1000);
-//    
-//    car_update(BACKWARD, 30);
-//    // delay(1000);
-//    car_update(STOP, 100);
-//    Serial.println("Test end");
+    Serial.println(" ");
+    Serial.println("Motor speed test start!");
     
-    Serial.println("Motor turn test start!");
-    for(int i=0;i<1;i++){
-        car_update(TURN_LEFT, 1);
-        car_update(TURN_RIGHT, 2);
-        car_update(TURN_LEFT, 1);
-        car_update(STOP, 1);
-      
-    }
+    car_update(FORWARD, 30);
+    // delay(1000);
+    
+    car_update(BACKWARD, 30);
+    // delay(1000);
+    car_update(STOP, 100);
     Serial.println("Test end");
+    
+//    Serial.println("Motor turn test start!");
+//    for(int i=0;i<1;i++){
+//        car_update(TURN_LEFT, 1);
+//        car_update(TURN_RIGHT, 2);
+//        car_update(TURN_LEFT, 1);
+//        car_update(STOP, 1);
+//      
+//    }
+//    Serial.println("Test end");
 
 }
 
