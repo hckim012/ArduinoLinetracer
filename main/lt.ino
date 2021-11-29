@@ -37,3 +37,6 @@ void set_lt_interrupt(){
     Timer1.initialize(1000); // every 1ms
     Timer1.attachInterrupt(lt_interrupt);
 }
+void unset_lt_interrupt(){
+    Timer1.detachInterrupt();
+}

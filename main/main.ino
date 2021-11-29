@@ -28,16 +28,38 @@ void car_update(int direction, int num_ticks){
 
 }
 
-unsigned long last_check_time = 0;
+long last_check_time = 0;
 int check_mission(){
     //TODO
-    last_check_time = millis();
-//    Serial.println(last_check_time);
+    long current_time = millis();
+    if(current_time - last_check_time > 1000){
+        Serial.println("Checking for mission");
+        car_update(STOP, 1);
+        unset_lt_interrupt();
+        last_check_time = current_time; 
+        
+        if(mission_state < DARK && is_dark()){
+            Serial.println("Mission Dark");
+            mission_state = DARK;
+            return DARK;
+        }
+        set_lt_interrupt();   
+    }
     return NOTHING;
 }
 int do_mission(int mission){
     //TODO
     // return 0 if success
+    switch(mission){
+        case DARK:{
+            car_update(STOP, 0);
+            while(1){
+                if(!is_dark())  break;
+                delay(500);
+            }
+            break;
+        }
+    }
     return 0;
 }
 
@@ -246,7 +268,8 @@ void setup(){
     Serial.begin(9600);
     init_lt_modules();
     init_motor();
-
+    init_light();
+    
     pinMode(SW, OUTPUT);
     //blink
     for(int i=0;i<3;i++){
@@ -267,13 +290,13 @@ void setup(){
 void loop(){
     // First check for any mission
     while(1){
-        mission_state = check_mission();
-        if(mission_state!=NOTHING){
+        if(check_mission()!=NOTHING){
             do_mission(mission_state);
         }
         else{
             break;
         }
+        delay(100);
     }
     travel();
 }

@@ -16,6 +16,8 @@
 //switch pin
 #define SW 8
 
+#define LIGHT A3
+
 #endif
 
 #define MIN_VOLTAGE (9.7)
@@ -64,5 +66,7 @@ const int curve_speed = 200;
 #define LT_THRESHOLD_R (54+100)
 
 volatile int l_cnt, f_cnt, r_cnt; // ms passed from last detection
+
+#define LIGHT_THRESHOLD 500
 
 #define USE_CONTROL true

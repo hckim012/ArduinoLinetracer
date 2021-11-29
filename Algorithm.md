@@ -16,6 +16,7 @@ If two or more sensors are high, determine junction
 3. list sensors which were high while moving forward
 4. go forward 6cm
 5. sway ~10 degrees to check if line is ahead    
+6. Go forward 10cm (??)
 
 now junction type is determined.
 
