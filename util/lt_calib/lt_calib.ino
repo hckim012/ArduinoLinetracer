@@ -8,9 +8,9 @@
 #define STOP 5
 
 // line tracer pins
-#define LT_MODULE_L A1
+#define LT_MODULE_L A5
 #define LT_MODULE_F A0
-#define LT_MODULE_R A2
+#define LT_MODULE_R A4
 
 // motor pins
 #define ENA 6
@@ -98,13 +98,13 @@ void car_update(int direction){
 float readSensor(int pin, bool verbose){
     int min = 1000;
     int max = 0;
-    int avg = 0;
-    for(int i=0;i<10;i++){
+    long avg = 0;
+    for(int i=0;i<400;i++){
         int ret = analogRead(pin);
         avg += ret;
         if(ret>max) max = ret;
         if(ret<min) min = ret;
-        delay(200);
+        delay(5);
     }
     if(verbose){
         Serial.print("min : ");
@@ -112,9 +112,9 @@ float readSensor(int pin, bool verbose){
         Serial.print(", max : ");
         Serial.print(max);
         Serial.print(", mean : ");
-        Serial.println(avg/10.0);
+        Serial.println(avg/400.0);
     }
-    return avg/10.0;
+    return avg/400.0;
 }
 /*
 시계방향 - 감소
@@ -131,8 +131,8 @@ void setup(){
     Serial.println("Sensor calibration start!");
     Serial.println("left module");
     int left = readSensor(LT_MODULE_L, true);
-    Serial.println("front module");
-    int forward = readSensor(LT_MODULE_F, true);
+//    Serial.println("front module");
+//    int forward = readSensor(LT_MODULE_F, true);
     Serial.println("right module");
     int right = readSensor(LT_MODULE_R, true);
     
