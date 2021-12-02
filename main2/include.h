@@ -5,7 +5,7 @@
 // line tracer pins
 #define LT_MODULE_L A5
 #define LT_MODULE_R A4
-#define LT_MODULE_F A2
+#define LT_MODULE_F A3
 
 // motor pins
 #define ENA 6
@@ -18,7 +18,7 @@
 //switch pin
 #define SW 8
 
-#define LIGHT A3
+#define LIGHT A2
 
 #endif
 
@@ -38,7 +38,7 @@
 //mission flags
 #define NOTHING 0
 #define DARK 1
-#define PARKING 2
+#define T_PARKING 2
 #define EMERGENCY 3
 
 // directions
@@ -64,7 +64,7 @@ const int curve_speed = 200;
 #define SENSOR_R 0b001
 
 #define LT_THRESHOLD_L 50
-#define LT_THRESHOLD_F (33+100)
+#define LT_THRESHOLD_F 100
 #define LT_THRESHOLD_R 50
 
 volatile int l_cnt, f_cnt, r_cnt; // ms passed from last detection

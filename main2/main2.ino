@@ -62,6 +62,12 @@ void car_update(int direction, int duration){
         car_update(STOP, 10);
         curve = 0;
     }
+    else if(counts[BACKWARD]>30){
+        #if DEBUG
+        Serial.println("backward stop");
+        #endif
+        car_update(STOP, 30);
+    }
 }
 void move_until(int direction, int target_sensor, int target_value, int max_time){
     if(max_time<10)  return;
@@ -110,6 +116,44 @@ int do_mission(int mission){
                 if(!is_dark())  break;
                 delay(500);
             }
+            change_strategy(RIGHT_FIRST);
+            break;
+        }
+        case T_PARKING:{
+            move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
+            Serial.println(lt_sense_now(),BIN);
+            if((lt_sense_now() & 0b011)==0b00){
+                
+            }
+            Serial.println("fake line");
+            car_update(STOP, 1000);
+            car_update(BACKWARD, 50);
+            move_until(BACKWARD, SENSOR_F, 0, 500);
+            move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
+            Serial.println("real line");
+            car_update(STOP, 1000);
+            car_update(BACKWARD, 50);
+            move_until(BACKWARD, SENSOR_F, 0, 1000);
+            
+            int i;
+            //important parameters to tune!
+            int min_steps = 10;
+            int max_steps = 30;
+            for(i=0;i<max_steps;i++){
+                Serial.println(i);
+                if(i>min_steps && (lt_sense_now() & SENSOR_R))  break;
+                move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 300);
+                car_update(BACKWARD, 50);
+                move_until(BACKWARD, SENSOR_F, 0, 300);    
+            }
+            if(i==30){
+                //parking failed
+            }
+            else{
+                move_until(BACKWARD, 0b011, 0, 5000);
+            }
+            car_update(BACKWARD, 300);
+            strategy = RIGHT_FIRST;
             break;
         }
     }
@@ -211,7 +255,11 @@ void setup(){
     mission_state = NOTHING;
     strategy = LEFT_FIRST;
     set_lt_interrupt();
+    while(digitalRead(SW)==LOW) delay(100);
     Serial.println("Run start!");
+    do_mission(T_PARKING);
+    delay(FOREVER);
+    Serial.println("parking end");
 }
 void loop(){
     // First check for any mission

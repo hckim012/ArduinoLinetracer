@@ -9,7 +9,7 @@
 
 // line tracer pins
 #define LT_MODULE_L A5
-#define LT_MODULE_F A0
+#define LT_MODULE_F A3
 #define LT_MODULE_R A4
 
 // motor pins
@@ -129,12 +129,12 @@ void setup(){
     pinMode(8, INPUT);
     Serial.println(" ");
     Serial.println("Sensor calibration start!");
-    Serial.println("left module");
-    int left = readSensor(LT_MODULE_L, true);
-//    Serial.println("front module");
-//    int forward = readSensor(LT_MODULE_F, true);
-    Serial.println("right module");
-    int right = readSensor(LT_MODULE_R, true);
+//    Serial.println("left module");
+//    int left = readSensor(LT_MODULE_L, true);
+//    Serial.println("right module");
+//    int right = readSensor(LT_MODULE_R, true);
+    Serial.println("back module");
+    int forward = readSensor(LT_MODULE_F, true);
     
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
