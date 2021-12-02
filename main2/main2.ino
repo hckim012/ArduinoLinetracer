@@ -2,8 +2,7 @@
 long counts[6];
 long curve = 0;
 int lt_state;
-
-//SoftwareSerial bt_serial(2,3);
+int cone_value;
 
 int mission_state;
 int strategy;
@@ -87,7 +86,7 @@ void move_until(int direction, int target_sensor, int target_value, int max_time
 
 
 long last_check_time = 0;
-int check_mission(){
+void update_mission(){
     //TODO
     long current_time = millis();
     if(current_time - last_check_time > 1000){
@@ -96,72 +95,121 @@ int check_mission(){
         #endif
         unset_lt_interrupt();
         last_check_time = current_time; 
+
+        if(mission_state != CONE_WAIT && mission_state !=DARK && is_ultrasonic()){
+            mission_state = CONE;
+        }
         
-        if(mission_state < DARK && is_dark()){
-            Serial.println("Mission Dark");
-            mission_state = DARK;
-            return DARK;
+        if(is_bluetooth()){
+            Serial.print("emergency");
+            mission_state = EMERGENCY;
         }
         set_lt_interrupt();   
     }
-    return NOTHING;
 }
 int do_mission(int mission){
     //TODO
     // return 0 if success
     switch(mission){
         case DARK:{
-            car_update(STOP, 0);
-            while(1){
-                if(!is_dark())  break;
+            car_update(STOP, 1);
+            while(is_dark()){
                 delay(500);
             }
-            change_strategy(RIGHT_FIRST);
+            change_strategy(LEFT_FIRST);
+            mission_state = MISSION_DONE;
             break;
         }
         case T_PARKING:{
-            move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
-            Serial.println(lt_sense_now(),BIN);
-            if((lt_sense_now() & 0b011)==0b00){
-                
-            }
-            Serial.println("fake line");
-            car_update(STOP, 1000);
-            car_update(BACKWARD, 50);
-            move_until(BACKWARD, SENSOR_F, 0, 500);
-            move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
-            Serial.println("real line");
-            car_update(STOP, 1000);
-            car_update(BACKWARD, 50);
-            move_until(BACKWARD, SENSOR_F, 0, 1000);
-            
-            int i;
-            //important parameters to tune!
-            int min_steps = 10;
-            int max_steps = 30;
-            for(i=0;i<max_steps;i++){
-                Serial.println(i);
-                if(i>min_steps && (lt_sense_now() & SENSOR_R))  break;
-                move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 300);
-                car_update(BACKWARD, 50);
-                move_until(BACKWARD, SENSOR_F, 0, 300);    
-            }
-            if(i==30){
-                //parking failed
-            }
-            else{
-                move_until(BACKWARD, 0b011, 0, 5000);
-            }
-            car_update(BACKWARD, 300);
+            set_lt_interrupt();
+            do_t_parking();
             strategy = RIGHT_FIRST;
+            mission_state = MISSION_DONE;
+            break;
+        }
+        case EMERGENCY:{
+            car_update(STOP, 1);
+            send_bluetooth(); // send "EMERGENCY" to bluetooth
+            delay(3000);
+            mission_state = MISSION_DONE;
+            break;
+        }
+        case CONE:{
+            car_update(STOP, 1);
+            Serial.print("rfid read : ");
+            cone_value = read_rfid();
+            Serial.println(cone_value);
+            mission_state = CONE_WAIT;
+            break;
+        }
+        case CONE_WAIT:{
+            while(is_ultrasonic()){
+                delay(100);
+            }
+            switch(cone_value){
+                case 0:{
+                    change_strategy(RIGHT_FIRST);
+                    mission_state = MISSION_DONE;
+                    break;
+                }
+                case 1:{
+                    mission_state = DARK;
+                    break;
+                }
+                case 2:{
+                    mission_state = T_PARKING;
+                    break;
+                }
+            }
+            break;
+        }
+        case MISSION_DONE:{
+            set_lt_interrupt();
+            mission_state = NOTHING;
             break;
         }
     }
     return 0;
 }
-
+int do_t_parking(){
+    move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
+    Serial.println(lt_sense_now(),BIN);
+    if((lt_sense_now() & 0b011)==0b00){
+        
+    }
+    Serial.println("fake line");
+    car_update(STOP, 1000);
+    car_update(BACKWARD, 50);
+    move_until(BACKWARD, SENSOR_F, 0, 500);
+    move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
+    Serial.println("real line");
+    car_update(STOP, 1000);
+    car_update(BACKWARD, 50);
+    move_until(BACKWARD, SENSOR_F, 0, 1000);
+    
+    int i;
+    //important parameters to tune!
+    int min_steps = 10;
+    int max_steps = 30;
+    for(i=0;i<max_steps;i++){
+        Serial.println(i);
+        if(i>min_steps && (lt_sense_now() & SENSOR_R))  break;
+        move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 300);
+        car_update(BACKWARD, 50);
+        move_until(BACKWARD, SENSOR_F, 0, 300);    
+    }
+    if(i==30){
+        //parking failed
+    }
+    else{
+        move_until(BACKWARD, 0b011, 0, 5000);
+    }
+    car_update(BACKWARD, 300);
+    return 0;
+}
 void change_strategy(int new_strategy){
     if(strategy == new_strategy)  return;
+    set_lt_interrupt();
     if(strategy == LEFT_FIRST && new_strategy == RIGHT_FIRST){
         move_until(TURN_RIGHT, SENSOR_L, SENSOR_L, 300);
     }
@@ -240,7 +288,7 @@ void setup(){
 //    bt_serial.begin(9600);
     init_lt_modules();
     init_motor();
-    init_light();
+    init_sensors();
     
     pinMode(SW, OUTPUT);
     //blink
@@ -264,7 +312,9 @@ void setup(){
 void loop(){
     // First check for any mission
     while(1){
-        if(check_mission()!=NOTHING){
+        update_mission();
+        if(mission_state != NOTHING){
+            Serial.println(mission_state);
             do_mission(mission_state);
         }
         else{

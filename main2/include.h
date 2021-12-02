@@ -18,6 +18,7 @@
 //switch pin
 #define SW 8
 
+//sensor pins
 #define LIGHT A2
 
 #endif
@@ -26,7 +27,6 @@
 #define INF 1000
 
 // time delay const
-// forward 1cm in 1 tick(depends on car speed)
 #define TICK 30
 #define TOCK 10
 #define FOREVER 10000
@@ -40,6 +40,9 @@
 #define DARK 1
 #define T_PARKING 2
 #define EMERGENCY 3
+#define CONE 4
+#define CONE_WAIT 5
+#define MISSION_DONE 6
 
 // directions
 #define FORWARD 1
