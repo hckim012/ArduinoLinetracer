@@ -15,11 +15,21 @@
 #define IN4 2
 #define ENB 5
 
-//switch pin
-#define SW 8
+
 
 //sensor pins
 #define LIGHT A2
+#define TRIGGER_PIN A1
+#define ECHO_PIN A0
+
+#define RX_PIN 9
+#define TX_PIN 8
+
+#define SS_PIN 10 //same pin as switch
+#define RST_PIN 0
+#define MOSI 11
+#define MISO 12
+#define SCK 13
 
 #endif
 
@@ -56,8 +66,8 @@
 #define MIN_WHEEL_SPEED 80
 
 // power of motor
-int speed = 100;
-const int backward_speed = 100;
+int speed = 140;
+const int backward_speed = 140;
 const int curve_speed = 200;
 
 
@@ -72,7 +82,7 @@ const int curve_speed = 200;
 
 volatile int l_cnt, f_cnt, r_cnt; // ms passed from last detection
 
-#define LIGHT_THRESHOLD 500
+#define LIGHT_THRESHOLD 300
 
 #define SLOW false
 #define DEBUG false

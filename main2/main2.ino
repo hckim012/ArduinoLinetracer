@@ -17,12 +17,7 @@ void set_counts(int direction, long value){
 }
 
 void car_update(int direction, int duration){
-    if(digitalRead(SW)==LOW){
-      set_counts(STOP, counts[STOP]+10);
-      roll(STOP);
-      delay(10);
-      return;
-    }
+    
     roll(direction);
     delay(duration);
 
@@ -44,7 +39,7 @@ void car_update(int direction, int duration){
 //        }
     }
     
-    if(counts[FORWARD]>100){
+    if(counts[FORWARD]>200){
         #if DEBUG
         Serial.println("forward stop");
         #endif
@@ -61,7 +56,7 @@ void car_update(int direction, int duration){
         car_update(STOP, 10);
         curve = 0;
     }
-    else if(counts[BACKWARD]>30){
+    else if(counts[BACKWARD]>100){
         #if DEBUG
         Serial.println("backward stop");
         #endif
@@ -87,9 +82,8 @@ void move_until(int direction, int target_sensor, int target_value, int max_time
 
 long last_check_time = 0;
 void update_mission(){
-    //TODO
     long current_time = millis();
-    if(current_time - last_check_time > 1000){
+    if(current_time - last_check_time > 500){
         #if DEBUG
         Serial.println("Checking for mission");
         #endif
@@ -108,10 +102,10 @@ void update_mission(){
     }
 }
 int do_mission(int mission){
-    //TODO
     // return 0 if success
     switch(mission){
         case DARK:{
+            unset_lt_interrupt();
             car_update(STOP, 1);
             while(is_dark()){
                 delay(500);
@@ -128,6 +122,7 @@ int do_mission(int mission){
             break;
         }
         case EMERGENCY:{
+            unset_lt_interrupt();
             car_update(STOP, 1);
             send_bluetooth(); // send "EMERGENCY" to bluetooth
             delay(3000);
@@ -135,9 +130,11 @@ int do_mission(int mission){
             break;
         }
         case CONE:{
+            unset_lt_interrupt();
             car_update(STOP, 1);
             Serial.print("rfid read : ");
             cone_value = read_rfid();
+            send_rfid_tagged();
             Serial.println(cone_value);
             mission_state = CONE_WAIT;
             break;
@@ -189,14 +186,15 @@ int do_t_parking(){
     
     int i;
     //important parameters to tune!
-    int min_steps = 10;
+    int min_steps = 6;
     int max_steps = 30;
     for(i=0;i<max_steps;i++){
         Serial.println(i);
+        Serial.println(lt_sense_now(),BIN);
         if(i>min_steps && (lt_sense_now() & SENSOR_R))  break;
-        move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 300);
-        car_update(BACKWARD, 50);
-        move_until(BACKWARD, SENSOR_F, 0, 300);    
+        move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 100);
+//        car_update(BACKWARD, 50);
+        move_until(BACKWARD, SENSOR_F, 0, 100);    
     }
     if(i==30){
         //parking failed
@@ -204,7 +202,10 @@ int do_t_parking(){
     else{
         move_until(BACKWARD, 0b011, 0, 5000);
     }
-    car_update(BACKWARD, 300);
+    move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 500);
+    delay(1000);
+    move_until(TURN_LEFT, SENSOR_L, SENSOR_L, 500);
+    move_until(FORWARD, SENSOR_L, SENSOR_L, 500);
     return 0;
 }
 void change_strategy(int new_strategy){
@@ -290,24 +291,15 @@ void setup(){
     init_motor();
     init_sensors();
     
-    pinMode(SW, OUTPUT);
-    //blink
-    for(int i=0;i<3;i++){
-        digitalWrite(SW, HIGH);
-        delay(150);
-        digitalWrite(SW,LOW);
-        delay(150);
-    }
-    pinMode(SW, INPUT);
+    
 
     mission_state = NOTHING;
-    strategy = LEFT_FIRST;
+    strategy = RIGHT_FIRST;
     set_lt_interrupt();
-    while(digitalRead(SW)==LOW) delay(100);
     Serial.println("Run start!");
-    do_mission(T_PARKING);
-    delay(FOREVER);
-    Serial.println("parking end");
+//    do_mission(T_PARKING);
+//    delay(3000);
+//    Serial.println("parking end");
 }
 void loop(){
     // First check for any mission

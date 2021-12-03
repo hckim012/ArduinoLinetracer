@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #define SS_PIN 10
-#define RST_PIN 9
+#define RST_PIN 0
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 
@@ -30,7 +30,7 @@ int strategy = 0;
 
 int g_carDirection = 0;
 int speed = 120;
-int tspeed = 250;
+int tspeed = 200;
 
 
 void setup() {
@@ -83,14 +83,14 @@ void loop() {
       strategy = 1;
       Serial.println(strategy);
       digitalWrite(EN1, HIGH);
-  digitalWrite(EN2, LOW);
-  digitalWrite(EN3, LOW);
-  digitalWrite(EN4, HIGH);
-  analogWrite(ENA, speed);
-  analogWrite(ENB, speed);
-  delay(1000);
-  analogWrite(ENA, 0);
-    analogWrite(ENB, 0);
+      digitalWrite(EN2, LOW);
+      digitalWrite(EN3, LOW);
+      digitalWrite(EN4, HIGH);
+      analogWrite(ENA, speed);
+      analogWrite(ENB, speed);
+      delay(1000);
+      analogWrite(ENA, 0);
+      analogWrite(ENB, 0);
     }
     else if(mode == 0x02){
       strategy = 2;

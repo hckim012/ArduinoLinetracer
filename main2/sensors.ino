@@ -28,27 +28,46 @@ bool is_ultrasonic(){
     }
 }
 
+SoftwareSerial bt_serial(RX_PIN, TX_PIN);
 void init_bluetooth(){
   bt_serial.begin(9600);
 }
 bool is_bluetooth(){
     // return true if signal received.
+    bool ret;
     if (bt_serial.available() > 0){
         byte data = (byte) bt_serial.read();
         if (data == 'e'){
-            return true;   
+            ret = true;   
         } else {
-            return false;   
+            ret = false;   
         }
     } else {
-        return false;   
+        ret = false;   
     }
+    return ret;
 }
 void send_bluetooth(){
     //send "EMERGENCY" to phone
     bt_serial.println("EMERGENCY");
 }
+void send_rfid_tagged(){
+    bt_serial.println("rfid");
+}
 
+#include <deprecated.h>
+#include <MFRC522.h>
+#include <MFRC522Extended.h>
+#include <require_cpp11.h>
+
+#include <SPI.h>
+
+
+MFRC522 mfrc522(SS_PIN,RST_PIN);
+MFRC522::MIFARE_Key key;
+byte buffer[18];  //Buffer size, at least 18 bytes.
+byte block, status;
+byte size;
 
 void init_rfid(){
   Serial.begin(9600);
@@ -62,37 +81,43 @@ void init_rfid(){
 int read_rfid(){
     // wait until rfid tagged then read it.
     // return 0 or 1 or 2
-      if(!mfrc522.PICC_IsNewCardPresent()){
-        return;
-      }
-      if(!mfrc522.PICC_ReadCardSerial()){
-        return;
-      }
-      status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A,block,&key,&(mfrc522.uid));
-      Serial.println(mfrc522.GetStatusCodeName(status));
-
-      status = mfrc522.MIFARE_Read(block, buffer, &size);
-      if (status != MFRC522::STATUS_OK){
-        return;
-      }else{
-        if(buffer[0] == 0x21){
-          byte data = buffer[1];
-          if(data == 0x00){
-            mode = 0; //RFS
-            delay(500);
+    int mode;
+    while(1){
+          Serial.println('a');
+          delay(100);
+          if(!mfrc522.PICC_IsNewCardPresent()){
+            continue;
           }
-          else if(data == 0x01){
-            mode = 1; //LFS
-            delay(500);
+          if(!mfrc522.PICC_ReadCardSerial()){
+            continue;
           }
-          else if(data == 0x02){
-            mode = 2; //T_PARKING
-            delay(500);
+          status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A,block,&key,&(mfrc522.uid));
+          Serial.println(mfrc522.GetStatusCodeName(status));
+    
+          status = mfrc522.MIFARE_Read(block, buffer, &size);
+          if (status != MFRC522::STATUS_OK){
+            continue;
           }
-        }
-
-      mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+          else{
+            if(buffer[0] == 0x21){
+              byte data = buffer[1];
+              if(data == 0x00){
+                mode = 0; //RFS
+              }
+              else if(data == 0x01){
+                mode = 1; //LFS
+              }
+              else if(data == 0x02){
+                mode = 2; //T_PARKING
+              }
+            }
+//            mfrc522.PICC_HaltA();
+            mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+            break;
+          }
       }
+      
+      return mode;
 }
 
 void init_sensors(){

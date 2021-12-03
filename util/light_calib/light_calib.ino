@@ -1,5 +1,5 @@
-#define LIGHT A3
-#define LIGHT_THRESHOLD 500
+#define LIGHT A2
+#define LIGHT_THRESHOLD 300
 void setup(){
     Serial.begin(9600);
     pinMode(LIGHT, INPUT);
