@@ -1,30 +1,21 @@
 # Algorithm
+## Left First
+Linetracer follows the *left edge* of the line by keeping the right sensor on the line and the left sensor off the line. Specifically, it moves according to the following rule. (L/R is the detection of the two sensors.)
+* not L and R - go forward
+* L and R - turn left until not L
+* not L and not R - turn right until R
+* L and not R(exceptional case) - turn left until R
 
-## Line tracing
-* If F, go forward
-* If L or R sensed, turn until F
-* If no sensor high, then two possibilities
-  * line is between F and L (or F and R):   
-       sway ~10 degrees to find line. (this may be improved by leveraging history, ie PID)
-  * line is not between L and R:
-        sway progressively more angle(x2 every time) until any sensor detects line.
+## Right First
+Follows the right edge of the line by doing the opposite.
 
-## Junction type determination  
-If two or more sensors are high, determine junction
-1. list the sensors which are high
-2. go forward 4cm (=2.3 * line width)
-3. list sensors which were high while moving forward
-4. go forward 6cm
-5. sway ~10 degrees to check if line is ahead    
-6. Go forward 10cm (??)
+## Changing between left/right first
+This happens when the RFID tag is tagged. It can be done easily if the line is not too wide.
+* Changing from left first to right first-   Turn right until L is on line.
+* Changing from right first to left first-   Turn left until R is on line.
 
-now junction type is determined.
+## Mission
+Linetracer checks for mission every 0.5s. The timing is done using the millis() function. The mission is handled by an FSM(Finite State Machine), where the current state is indicated by a flag named mission_state. The possible states and transitions of the FSM are shown in the following drawing.
 
 
-## Junction turn
-determine direction to go based on strategy.(LEFT_FIRST/RIGHT_FIRST)
-- If forward, go forward
-- If turn,
-1. Turn for 3 ticks
-2. Turn until nearest sensor is sensed.
-3. delay for a while
+![image](state.png)
