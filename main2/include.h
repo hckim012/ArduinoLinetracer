@@ -66,8 +66,8 @@
 #define MIN_WHEEL_SPEED 80
 
 // power of motor
-int speed = 140;
-const int backward_speed = 140;
+int speed = 100;
+const int backward_speed = 100;
 const int curve_speed = 200;
 
 
