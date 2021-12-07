@@ -25,7 +25,7 @@
 #define RX_PIN 9
 #define TX_PIN 8
 
-#define SS_PIN 10 //same pin as switch
+#define SS_PIN 10
 #define RST_PIN 0
 #define MOSI 11
 #define MISO 12
@@ -33,7 +33,7 @@
 
 #endif
 
-#define MIN_VOLTAGE (9.7)
+#define MIN_VOLTAGE (11.0) //test voltage 11.0V
 #define INF 1000
 
 // time delay const

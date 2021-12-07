@@ -32,11 +32,6 @@ void car_update(int direction, int duration){
             delay(50);
             roll(STOP);
         }
-//        if(curve%1000==999){
-//            speed += 10;
-//            Serial.print("Adjust speed to");
-//            Serial.println(speed);
-//        }
     }
     
     if(counts[FORWARD]>200){
@@ -170,10 +165,7 @@ int do_mission(int mission){
 }
 int do_t_parking(){
     move_until(BACKWARD, SENSOR_F, SENSOR_F, FOREVER);
-    Serial.println(lt_sense_now(),BIN);
-    if((lt_sense_now() & 0b011)==0b00){
-        
-    }
+
     Serial.println("fake line");
     car_update(STOP, 1000);
     car_update(BACKWARD, 50);
@@ -193,7 +185,6 @@ int do_t_parking(){
         Serial.println(lt_sense_now(),BIN);
         if(i>min_steps && (lt_sense_now() & SENSOR_R))  break;
         move_until(TURN_RIGHT, SENSOR_F, SENSOR_F, 100);
-//        car_update(BACKWARD, 50);
         move_until(BACKWARD, SENSOR_F, 0, 100);    
     }
     if(i==30){
@@ -286,20 +277,14 @@ void travel(){
 
 void setup(){
     Serial.begin(9600);
-//    bt_serial.begin(9600);
     init_lt_modules();
     init_motor();
     init_sensors();
-    
-    
 
     mission_state = NOTHING;
     strategy = RIGHT_FIRST;
     set_lt_interrupt();
     Serial.println("Run start!");
-//    do_mission(T_PARKING);
-//    delay(3000);
-//    Serial.println("parking end");
 }
 void loop(){
     // First check for any mission
